@@ -1,37 +1,60 @@
 module Main where
 
-import Optimizer (Sample, Params, predict, mse, trainGD)
+import Optimizer (Sample, Params, predict, trainGD)
+import DataLoader (loadF1Data, normalizeFeatures)
+import Metrics (r2Score, mae, rmse, trainTestSplit, crossValidate)
 
-runLinearRegression :: IO ()
-runLinearRegression = do
-  let ds :: [Sample]
-      ds = [ ([1,  0],  7)
-           , ([0,  1],  2)
-           , ([2,  1],  6)
-           , ([3, -1], 16)
-           , ([4,  2],  7)
-           ]
+runF1LapTimePredictor :: IO ()
+runF1LapTimePredictor = do
+  putStrLn "=== F1 Lap Time Prediction Model ==="
+  
+  result <- loadF1Data "f1_data.csv"
+  case result of
+    Left err -> putStrLn $ "Error loading data: " ++ err
+    Right rawData -> do
+      let normalizedData = normalizeFeatures rawData
+          (trainData, testData) = trainTestSplit 0.8 normalizedData
+          
+          p0 :: Params
+          p0 = ([0, 0, 0, 0], 0)
+          
+          steps = 10000
+          lr = 0.01
+          
+          trainedParams = trainGD steps lr p0 trainData
+          
+          trainMse = rmse trainedParams trainData
+          testMse = rmse trainedParams testData
+          testR2 = r2Score trainedParams testData
+          testMae = mae trainedParams testData
+          testRmse = rmse trainedParams testData
+          
+          cvScore = crossValidate 3 normalizedData trainGD steps lr p0
 
-      p0 :: Params
-      p0 = ([0, 0], 0)
-
-      steps = 5000
-      lr = 0.01
-      loss0 = mse p0 ds
-      pFinal = trainGD steps lr p0 ds
-      lossFinal = mse pFinal ds
-
-  putStrLn "=== Linear Regression via Gradient Descent ==="
-  putStrLn $ "init params: " ++ show p0
-  putStrLn $ "init loss  : " ++ show loss0
-  putStrLn $ "steps      : " ++ show steps
-  putStrLn $ "lr         : " ++ show lr
-  putStrLn $ "final params: " ++ show pFinal
-  putStrLn $ "final loss  : " ++ show lossFinal
-
-  let xTest = [2, -3]
-  putStrLn $ "predict([2,-3]) = " ++ show (predict pFinal xTest)
+      putStrLn $ "Training samples: " ++ show (length trainData)
+      putStrLn $ "Test samples: " ++ show (length testData)
+      putStrLn $ "Features: driver_experience, tire_compound, fuel_load, track_temp"
+      putStrLn ""
+      putStrLn $ "Final params: " ++ show trainedParams
+      putStrLn $ "Train RMSE: " ++ show trainMse
+      putStrLn $ "Test RMSE: " ++ show testMse  
+      putStrLn $ "Test R²: " ++ show testR2
+      putStrLn $ "Test MAE: " ++ show testMae
+      putStrLn $ "Test RMSE: " ++ show testRmse
+      putStrLn $ "3-fold CV MSE: " ++ show cvScore
+      putStrLn ""
+      
+      putStrLn "=== Predictions vs Actual (Test Set) ==="
+      let predictions = map (predict trainedParams . fst) testData
+          actuals = map snd testData
+      mapM_ (\(p, a) -> putStrLn $ "Predicted: " ++ show (round p :: Int) ++ "s, Actual: " ++ show (round a :: Int) ++ "s") 
+            (zip predictions actuals)
+      
+      putStrLn ""
+      let sampleFeatures = [12.5, 1.0, 42.0, 30.0]
+      putStrLn $ "Sample prediction (exp=12.5, tire=1, fuel=42, temp=30): " 
+      putStrLn $ show (predict trainedParams sampleFeatures) ++ " seconds"
 
 main :: IO ()
-main = runLinearRegression
+main = runF1LapTimePredictor
 
