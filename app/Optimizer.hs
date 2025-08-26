@@ -1,5 +1,7 @@
 module Optimizer where
 
+import LossFunction (lossFunction)
+
 -- Types
 type Vector = [Double]                 
 type Sample = (Vector, Double)        
@@ -11,13 +13,10 @@ predict (w, b) x = b + sum (zipWith (*) w x)
 
 -- ---------- Loss (MSE) ----------
 mse :: Params -> [Sample] -> Double
-mse p ds = total / m
+mse p ds = lossFunction predictions actuals
   where
-    (total, n) = foldr step (0, 0 :: Int) ds
-    step (x,y) (acc, k) =
-      let e = predict p x - y
-      in (acc + e*e, k + 1)
-    m = fromIntegral n
+    predictions = map (predict p . fst) ds
+    actuals = map snd ds
 
 -- ---------- Gradients of MSE ----------
 -- dL/db   = (2/m) * Σ e_i
