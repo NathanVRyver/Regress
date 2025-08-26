@@ -1,6 +1,6 @@
 module Main where
 
-import Optimizer (Vector, Sample, Params, predict, mse, trainGD)
+import Optimizer (Sample, Params, predict, mse, trainGD)
 
 runLinearRegression :: IO ()
 runLinearRegression = do
