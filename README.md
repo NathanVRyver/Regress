@@ -1,4 +1,4 @@
-# Regress
+# Linear-Regress
 
 [![Haskell](https://img.shields.io/badge/language-Haskell-blue.svg)](https://www.haskell.org/)
 [![BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](LICENSE)
@@ -15,8 +15,54 @@ A clean, lightweight Haskell library for linear regression with gradient descent
 
 ## Installation
 
+### Method 1: Direct from GitHub (Recommended)
+
+Add this package as a dependency in your project's `.cabal` file:
+
+```cabal
+build-depends: base ^>=4.18.3.0,
+               linear-regress
+               
+source-repository-package
+    type: git
+    location: https://github.com/NathanVRyver/linear_regression_haskell.git
+    tag: main
+```
+
+Then run:
 ```bash
-cabal install regress
+cabal update
+cabal build
+```
+
+### Method 2: Clone and Build Locally
+
+```bash
+git clone https://github.com/NathanVRyver/linear_regression_haskell.git
+cd linear_regression_haskell
+cabal build
+cabal install --lib
+```
+
+### Method 3: Use as Local Dependency
+
+1. Clone the repository:
+```bash
+git clone https://github.com/NathanVRyver/linear_regression_haskell.git
+```
+
+2. In your project's `cabal.project` file, add:
+```cabal
+packages: .
+          path/to/linear_regression_haskell
+```
+
+### Method 4: Download Pre-built Distribution
+
+Download the source distribution from [GitHub Releases](https://github.com/NathanVRyver/linear_regression_haskell/releases) and install:
+
+```bash
+cabal install linear-regress-0.0.1.tar.gz
 ```
 
 ## Quick Start

@@ -1,6 +1,6 @@
 cabal-version:      3.0
 
-name:               regress
+name:               linear-regress
 version:            0.0.1
 synopsis:           Simple and efficient linear regression library
 description:        A clean, lightweight Haskell library for linear regression
@@ -31,12 +31,12 @@ library
                       bytestring
     default-language: Haskell2010
 
-executable regress-example
+executable linear-regress-example
     import:           warnings
     main-is:          Main.hs
     hs-source-dirs:   examples
     build-depends:    base ^>=4.18.3.0,
-                      regress,
+                      linear-regress,
                       cassava,
                       vector,
                       bytestring
@@ -47,7 +47,7 @@ executable auto-example
     main-is:          AutoExample.hs
     hs-source-dirs:   examples
     build-depends:    base ^>=4.18.3.0,
-                      regress,
+                      linear-regress,
                       cassava,
                       vector,
                       bytestring
