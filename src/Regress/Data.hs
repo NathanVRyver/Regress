@@ -1,39 +1,25 @@
 {-# LANGUAGE OverloadedStrings #-}
-module DataLoader where
+module Regress.Data
+  ( loadCSV
+  , normalizeFeatures
+  ) where
 
 import Data.Csv
 import Data.Vector (Vector, toList)
 import qualified Data.ByteString.Lazy as BL
-import Optimizer (Sample)
+import Regress.Core (Sample)
 
-data F1Record = F1Record
-  { driverExperience :: Double
-  , tireCompound :: Double
-  , fuelLoad :: Double
-  , trackTemp :: Double
-  , lapTime :: Double
-  } deriving (Show)
-
-instance FromRecord F1Record where
-  parseRecord v
-    | length v == 5 = F1Record
-        <$> v .! 0
-        <*> v .! 1
-        <*> v .! 2
-        <*> v .! 3
-        <*> v .! 4
-    | otherwise = fail "Wrong number of fields"
-
-loadF1Data :: FilePath -> IO (Either String [Sample])
-loadF1Data filepath = do
+loadCSV :: FilePath -> IO (Either String [Sample])
+loadCSV filepath = do
   csvData <- BL.readFile filepath
   case decodeWith csvOptions HasHeader csvData of
     Left err -> return $ Left err
-    Right records -> return $ Right $ map recordToSample (toList records)
+    Right records -> return $ Right $ map Regress.Data.parseRecord (toList records)
   where
     csvOptions = defaultDecodeOptions
-    recordToSample (F1Record exp tire fuel temp time) =
-      ([exp, tire, fuel, temp], time)
+
+parseRecord :: [Double] -> Sample
+parseRecord xs = (init xs, last xs)
 
 normalizeFeatures :: [Sample] -> [Sample]
 normalizeFeatures samples = map normalizeSample samples
